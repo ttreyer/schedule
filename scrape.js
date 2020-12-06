@@ -37,8 +37,8 @@ let coursesScraped = new Set()
  *   code: The short name for the course (CS-728) as a unique ID
  */
 let scrapeCourse = async (url) => {
-  await sleep(100)
-  console.log(url)
+  await sleep(50)
+  console.error(`course: ${url}`)
   const jsdom = await JSDOM.fromURL(url)
   const doc = jsdom.window.document
 
@@ -68,7 +68,7 @@ let mapUniqueHref = (courses) =>
 
 let scrapePlan = async (url) => {
   await sleep(100)
-  console.log(url)
+  console.error(`plan: ${url}`)
   const jsdom = await JSDOM.fromURL(url)
   const doc = jsdom.window.document
 
@@ -90,11 +90,13 @@ let scrapePlan = async (url) => {
   //   if (url.includes("/coursebook/")) return await scrapeCourse(url)
   //   else return await scrapePlan(url)
   // })
+  let res = []
   for (let i = 0, l = coursesUrls.length; i < l; ++i) {
     const url = coursesUrls[i]
-    if (url.includes("/coursebook/")) return await scrapeCourse(url)
-    else return await scrapePlan(url)
+    if (url.includes("/coursebook/")) res.push(await scrapeCourse(url))
+    else res.push(await scrapePlan(url))
   }
+  return res
 }
 
 ;(async () => {
@@ -108,6 +110,7 @@ let scrapePlan = async (url) => {
     const planURL = planURLs[i]
     scrapes.push(await scrapePlan(planURL))
   }
+  console.log(JSON.stringify(scrapes.flat(999), null, 2))
   // const scrape = planURLs.map(async (planURL) => await scrapePlan(planURL))
 })()
 
@@ -121,10 +124,11 @@ let scrapePlan = async (url) => {
 //   .then((_) => _.flat(999))
 //   .then(console.log)
 
-// let masterIN = "https://edu.epfl.ch/studyplan/fr/master/informatique";
+// let masterIN = "https://edu.epfl.ch/studyplan/fr/master/informatique"
 // scrapePlan(masterIN)
 //   .then((_) => _.flat(999))
-//   .then(console.log);
+//   .then((_) => JSON.stringify(_, null, 2))
+//   .then(console.log)
 
 // scrapeCourse(
 //   "https://edu.epfl.ch/coursebook/fr/distributed-algorithms-CS-451?cb_cycle=bama_cyclemaster&cb_section=in"
