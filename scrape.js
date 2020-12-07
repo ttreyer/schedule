@@ -110,7 +110,12 @@ let scrapePlan = async (url) => {
     const planURL = planURLs[i]
     scrapes.push(await scrapePlan(planURL))
   }
-  console.log(JSON.stringify(scrapes.flat(999), null, 2))
+
+  let uniqKey = (c) => `${c.short}:${c.day}:${c.start}:${c.end}`
+
+  let uniqScrapes = {}
+  scrapes.flat(999).forEach((c) => (uniqScrapes[uniqKey(c)] = c))
+  console.log(JSON.stringify(Object.values(uniqScrapes), null, 2))
   // const scrape = planURLs.map(async (planURL) => await scrapePlan(planURL))
 })()
 
