@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Schedules</title>
+  <link rel="shortcut icon" href="/favicon.ico?v=2">
+  <link rel="apple-touch-icon" href="/favicon.png?v=2">
+  <link rel="stylesheet" href="schedule.css">
+</head>
+
+<body>
+  <script>
+    let getInitialColorMode = () => {
+      const persistedColorPreference = window.localStorage.getItem('color-mode')
+      const hasPersistedPreference = typeof persistedColorPreference === 'string'
+
+      if (hasPersistedPreference)
+        return persistedColorPreference
+
+      const mql = window.matchMedia('(prefers-color-scheme: dark)')
+      const hasMediaQueryPreference = typeof mql.matches === 'boolean'
+
+      if (hasMediaQueryPreference)
+        return mql.matches ? 'dark' : 'light'
+
+      return 'light'
+    }
+
+    const colorMode = getInitialColorMode()
+    const body = document.querySelector('body')
+    body.classList.add(colorMode)
+  </script>
+
+  <button id="btn-color-mode"></button><br>
+
+  <label for="courses-search">
+    Search course:
+    <input name="courses-search" id="courses-search">
+  </label>
+  <ul class="courses"></ul>
+
+  <div class="chart"></div>
+
+  <style id="style-to-remove">
+    /* Disable transition during page load to prevent style flashing */
+    * {
+      transition: none !important;
+    }
+  </style>
+
+  <script>
+    let toggleColorMode = () => {
+      const currentColorMode = getInitialColorMode()
+      const invertColorMode = currentColorMode === 'light' ? 'dark' : 'light'
+
+      window.localStorage.setItem('color-mode', invertColorMode)
+      body.classList.remove(currentColorMode)
+      body.classList.add(invertColorMode)
+    }
+
+    document.querySelector('#btn-color-mode')
+      .addEventListener('click', toggleColorMode)
+    document.addEventListener('DOMContentLoaded', () => document.querySelector('#style-to-remove').remove())
+  </script>
+
+  <script src="plan.js"></script>
+  <script src="merge.js"></script>
+  <script src="schedule.js"></script>
+  <script>
+    let updateSchedule = (shorts) => {
+      console.trace(shorts)
+      const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+
+      const classes = ALL_CLASSES.filter(_ => shorts.has(_.short))
+      // const classes = ALL_CLASSES
+      const classesByDay = groupBy(classes, "day")
+      const plan = weekdays.map(day =>
+        minMergeDay({ name: day, courses: classesByDay[day] || [] }))
+
+      let chart = document.querySelector('.chart')
+      chart.innerHTML = ""
+      buildSchedule(plan, chart)
+    }
+
+    const courses = Object.values(groupBy(ALL_CLASSES, "short")).sort((a, b) => a[0].short.localeCompare(b[0].short))
+    const coursesSearchInput = document.querySelector('#courses-search')
+    let filterCourses = () => {
+      const needles = coursesSearchInput.value
+        .split(/\s+/)
+        .map(_ => new RegExp(_, 'i'))
+
+      const coursesFound = courses.filter(
+        c => needles.every(n => n.test(c[0].short)
+                             || n.test(c[0].name)))
+      updateCourses(coursesFound)
+    }
+    coursesSearchInput.addEventListener('input', filterCourses)
+
+    let selectedShorts = new Set()
+    const coursesElement = document.querySelector('.courses')
+    let updateCourses = courses => {
+      coursesElement.textContent = ''
+      courses.forEach(classes => {
+        const { name, short } = classes[0]
+        const courseElement = document.createElement('li')
+        courseElement.textContent = `${short}: ${name}`
+        courseElement.dataset.short = short
+        courseElement.addEventListener('click', (e) => {
+          console.log(e);
+          if (selectedShorts.has(short))
+            selectedShorts.delete(short)
+          else
+            selectedShorts.add(short)
+          updateSchedule(selectedShorts)
+          e.preventDefault()
+        })
+        coursesElement.appendChild(courseElement)
+      })
+    }
+
+    filterCourses()
+
+    updateSchedule(selectedShorts)
+
+  </script>
+</body>
+
+</html>
