@@ -9,6 +9,7 @@ body.light {
   --separator-color: #424242;
   --hour-separator-color: #dadada;
   --chart-text-color: #424242;
+  --highlight-text-color: black;
   --button-content: "🌑 Dark mode";
 }
 
@@ -22,6 +23,7 @@ body.dark {
   --separator-color: #bdbdbd;
   --hour-separator-color: #555555;
   --chart-text-color: #bdbdbd;
+  --highlight-text-color: #dbdbdb;
   --button-content: "🌕 Light mode";
 }
 
@@ -155,11 +157,28 @@ body {
 
 * {
   transition: opacity 0.2s ease 0.1s, grid-template-columns 0.2s ease,
-    background-color 0.2s ease, color 0.2s ease;
+    background-color 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
 }
 .hidden {
   opacity: 0.4;
 }
 img.hidden {
   opacity: 0.05;
+}
+
+.multicolumns {
+  display: flex;
+  flex-direction: row;
+}
+
+.courses {
+  width: 380px;
+  margin-right: 2em;
+  padding-left: 1em;
+  line-height: 1.2em;
+}
+
+.selected {
+  font-weight: 700;
+  color: var(--highlight-text-color);
 }

@@ -34,13 +34,19 @@
 
   <button id="btn-color-mode"></button><br>
 
-  <label for="courses-search">
-    Search course:
-    <input name="courses-search" id="courses-search">
-  </label>
-  <ul class="courses"></ul>
+  <div class="multicolumns">
+    <div>
+      <label for="courses-search">
+        Search course:
+        <input name="courses-search" id="courses-search">
+      </label>
+      <ul class="courses"></ul>
+    </div>
 
-  <div class="chart"></div>
+    <div>
+      <div class="chart"></div>
+    </div>
+  </div>
 
   <style id="style-to-remove">
     /* Disable transition during page load to prevent style flashing */
@@ -108,10 +114,13 @@
         courseElement.dataset.short = short
         courseElement.addEventListener('click', (e) => {
           console.log(e);
-          if (selectedShorts.has(short))
+          if (selectedShorts.has(short)) {
             selectedShorts.delete(short)
-          else
+            courseElement.classList.remove('selected')
+          } else {
             selectedShorts.add(short)
+            courseElement.classList.add('selected')
+          }
           updateSchedule(selectedShorts)
           e.preventDefault()
         })
