@@ -1,3 +1,9 @@
+/**
+ * @template T
+ * @param {T[]} xs
+ * @param {string} key
+ * @return {Object}
+ */
 let groupBy = function (xs, key) {
   return xs.reduce(function (rv, x) {
     ;(rv[x[key]] = rv[x[key]] || []).push(x)
@@ -5,6 +11,10 @@ let groupBy = function (xs, key) {
   }, {})
 }
 
+/**
+ * @param {number} from
+ * @param {number} to
+ */
 let range = (from, to) => {
   let xs = [],
     i = to - from
@@ -12,6 +22,16 @@ let range = (from, to) => {
   return xs
 }
 
+/**
+ * @typedef {Object} Class
+ * @property {number} start
+ * @property {number} end
+ */
+
+/**
+ * @param {Class[]} column
+ * @return {number}
+ */
 let columnMask = (column) =>
   column
     .flatMap((course) => range(course.start, course.end))
@@ -55,7 +75,7 @@ let minMergeColumns = (columns) => {
 
 let minMergeDay = (day) => {
   let courses = day.courses
-  let columns = Object.values(groupBy(courses, "name"))
+  let columns = Object.values(groupBy(courses, "short"))
   let min = minMergeColumns(columns)
 
   min.forEach((col, i) => col.forEach((_) => (_.col = i)))
