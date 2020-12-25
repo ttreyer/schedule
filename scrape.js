@@ -1,8 +1,8 @@
 const { JSDOM } = require("jsdom")
 
 const classToType = {
-  "local-color": "class",
-  "local-color-light": "exercice",
+  "local-color": "course",
+  "local-color-light": "exercise",
   "local-color-dark": "project",
 }
 const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
@@ -37,7 +37,7 @@ let coursesScraped = new Set()
  *   code: The short name for the course (CS-728) as a unique ID
  */
 let scrapeCourse = async (url) => {
-  await sleep(50)
+  await sleep(20)
   console.error(`course: ${url}`)
   const jsdom = await JSDOM.fromURL(url)
   const doc = jsdom.window.document
@@ -52,7 +52,7 @@ let scrapeCourse = async (url) => {
     const type = getType(session)
     const day = getDay(session)
 
-    return { name, short, rooms, day, start, end, type }
+    return { name, short, rooms, day, start, end, type, members: [] }
   })
 
   return sessions
@@ -67,7 +67,6 @@ let mapUniqueHref = (courses) =>
   ).filter((_) => _)
 
 let scrapePlan = async (url) => {
-  await sleep(100)
   console.error(`plan: ${url}`)
   const jsdom = await JSDOM.fromURL(url)
   const doc = jsdom.window.document
