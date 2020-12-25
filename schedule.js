@@ -3,7 +3,10 @@ function buildSchedule(data, chart, peopleElement) {
   const startHour = 8,
     endHour = 18
   const slotRowsCount = endHour - startHour,
-    slotColumnsCount = data.reduce((acc, day) => acc + day.conflicts + 1, 0)
+    slotColumnsCount = data.reduce(
+      (acc, day) => acc + Math.max(1, day.conflicts) + 1,
+      0
+    )
 
   let people = data.reduce((acc, day) => {
     day.courses.forEach((course) =>
@@ -74,18 +77,11 @@ function buildSchedule(data, chart, peopleElement) {
   data.forEach((day, i) => (day.visible = i == today))
 
   let chartTemplateColumns = () =>
-    data.reduce(
-      (acc, day) =>
-        acc +
-        " 2px repeat(" +
-        day.conflicts +
-        ", " +
-        (day.visible ? "105px" : "30px") +
-        ")",
-      "25px"
-    )
+    data.reduce((acc, day) => acc + " 2px " + dayTemplateColumns(day), "25px")
   let dayTemplateColumns = (day) =>
-    "repeat(" + day.conflicts + ", " + (day.visible ? "105px" : "30px") + ")"
+    day.conflicts
+      ? `repeat(${day.conflicts}, ${day.visible ? "105px" : "30px"})`
+      : "105px"
   let reloadTemplates = () => {
     chart.style["grid-template-columns"] = chartTemplateColumns()
     document.querySelectorAll(".day").forEach((dayElement, i) => {
@@ -278,6 +274,6 @@ function buildSchedule(data, chart, peopleElement) {
 
     chart.appendChild(dayElement)
 
-    column += day.conflicts
+    column += Math.max(1, day.conflicts)
   })
 }
