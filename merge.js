@@ -2,7 +2,7 @@
  * @template T
  * @param {T[]} xs
  * @param {string} key
- * @return {Object}
+ * @return {Object.<string, T[]>}
  */
 let groupBy = function (xs, key) {
   return xs.reduce(function (rv, x) {
@@ -37,6 +37,10 @@ let columnMask = (column) =>
     .flatMap((course) => range(course.start, course.end))
     .reduce((acc, b) => acc | (1 << b), 0)
 
+/**
+ * @param {Class[][]} columns
+ * @return {Class[][]}
+ */
 let mergeColumns = (columns) => {
   if (columns.length <= 1) return columns
 
@@ -53,6 +57,10 @@ let mergeColumns = (columns) => {
   return [col].concat(mergeColumns(rejected))
 }
 
+/**
+ * @template T
+ * @param {T[]} xs
+ */
 let rots = (xs) => {
   let ret = []
 
@@ -64,6 +72,9 @@ let rots = (xs) => {
   return ret
 }
 
+/**
+ * @param {Class[][]} columns
+ */
 let minMergeColumns = (columns) => {
   let min = columns
   for (r of rots(columns)) {
@@ -73,6 +84,15 @@ let minMergeColumns = (columns) => {
   return min
 }
 
+/**
+ * @typedef {Object} Day
+ * @property {Class[]} courses
+ * @property {number} conflicts
+ */
+
+/**
+ * @param {Day} day
+ */
 let minMergeDay = (day) => {
   let courses = day.courses
   let columns = Object.values(groupBy(courses, "short"))

@@ -112,6 +112,7 @@
         const courseElement = document.createElement('li')
         courseElement.textContent = `${short}: ${name}`
         courseElement.dataset.short = short
+
         courseElement.addEventListener('mouseenter', (e) => {
           updateSchedule(new Set([short, ...selectedShorts]))
           e.preventDefault()
@@ -120,6 +121,7 @@
           updateSchedule(selectedShorts)
           e.preventDefault()
         })
+
         courseElement.addEventListener('click', (e) => {
           if (selectedShorts.has(short)) {
             selectedShorts.delete(short)
@@ -131,6 +133,7 @@
           updateSchedule(selectedShorts)
           e.preventDefault()
         })
+
         coursesElement.appendChild(courseElement)
       })
     }
