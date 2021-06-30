@@ -7,9 +7,27 @@ const classToType = {
 }
 const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
+// Scrapping course
 let sleep = async (ms) => await new Promise((r) => setTimeout(r, ms))
-let getShort = (doc) => doc.querySelector(".content h4").textContent.trim()
-let getName = (doc) => doc.querySelector(".content h2").textContent.trim()
+let getSelectMatch = (doc, sel, regex) =>
+  doc.querySelector(sel).textContent.match(regex)[1]
+let getShort = (doc) =>
+  getSelectMatch(doc, ".course-summary", /([-0-9A-Za-z]+)\s+\//)
+let getName = (doc) => getSelectMatch(doc, "main h1", /(.+)/)
+let getCredits = (doc) =>
+  parseInt(getSelectMatch(doc, ".course-summary", /(\d+)\s+credits/))
+let getTeacher = (doc) =>
+  getSelectMatch(doc, ".course-summary", /Teacher:\s+([^\n]+)/)
+let getLanguage = (doc) =>
+  getSelectMatch(doc, ".course-summary", /Language:\s+([^\n]+)/)
+let getSummary = (doc) => getSelectMatch(doc, "h2~p", /(.+)/)
+let getContent = (doc) =>
+  Array.from(doc.querySelectorAll("#course-content p"))
+    .map((_) => _.textContent)
+    .join("\n")
+    .trim()
+
+// Scrapping sessions
 let getSessions = (doc) => doc.querySelectorAll("td.taken")
 let getRooms = (session) =>
   Array.from(session.querySelectorAll("a")).map((room) => room.textContent)
@@ -42,10 +60,17 @@ let scrapeCourse = async (url) => {
   const jsdom = await JSDOM.fromURL(url)
   const doc = jsdom.window.document
 
-  const short = getShort(doc)
-  const name = getName(doc)
+  const course = {
+    short: getShort(doc),
+    name: getName(doc),
+    credits: getCredits(doc),
+    teacher: getTeacher(doc),
+    language: getLanguage(doc),
+    summary: getSummary(doc),
+    content: getContent(doc),
+  }
 
-  const sessions = Array.from(getSessions(doc)).map((session) => {
+  course.sessions = Array.from(getSessions(doc)).map((session) => {
     const rooms = getRooms(session)
     const start = getStart(session)
     const end = getEnd(session, start)
@@ -55,7 +80,7 @@ let scrapeCourse = async (url) => {
     return { name, short, rooms, day, start, end, type, members: [] }
   })
 
-  return sessions
+  return course
 }
 
 let filterSeason = (course) => course.querySelector(".winter") !== null
@@ -98,25 +123,25 @@ let scrapePlan = async (url) => {
   return res
 }
 
-;(async () => {
-  const studyplanURL = "https://edu.epfl.ch/studyplan/en"
-  const studyplan = await JSDOM.fromURL(studyplanURL)
-  const planURLs = Array.from(
-    studyplan.window.document.querySelectorAll(".study_plan_list a")
-  ).map((_) => _.href)
-  let scrapes = []
-  for (let i = 0, l = planURLs.length; i < l; ++i) {
-    const planURL = planURLs[i]
-    scrapes.push(await scrapePlan(planURL))
-  }
+// ;(async () => {
+//   const studyplanURL = "https://edu.epfl.ch/studyplan/en"
+//   const studyplan = await JSDOM.fromURL(studyplanURL)
+//   const planURLs = Array.from(
+//     studyplan.window.document.querySelectorAll(".study_plan_list a")
+//   ).map((_) => _.href)
+//   let scrapes = []
+//   for (let i = 0, l = planURLs.length; i < l; ++i) {
+//     const planURL = planURLs[i]
+//     scrapes.push(await scrapePlan(planURL))
+//   }
 
-  let uniqKey = (c) => `${c.short}:${c.day}:${c.start}:${c.end}`
+//   let uniqKey = (c) => `${c.short}:${c.day}:${c.start}:${c.end}`
 
-  let uniqScrapes = {}
-  scrapes.flat(999).forEach((c) => (uniqScrapes[uniqKey(c)] = c))
-  console.log(JSON.stringify(Object.values(uniqScrapes), null, 2))
-  // const scrape = planURLs.map(async (planURL) => await scrapePlan(planURL))
-})()
+//   let uniqScrapes = {}
+//   scrapes.flat(999).forEach((c) => (uniqScrapes[uniqKey(c)] = c))
+//   console.log(JSON.stringify(Object.values(uniqScrapes), null, 2))
+//   // const scrape = planURLs.map(async (planURL) => await scrapePlan(planURL))
+// })()
 
 // JSDOM.fromURL(studyplanURL)
 //   .then((_) =>
@@ -134,6 +159,9 @@ let scrapePlan = async (url) => {
 //   .then((_) => JSON.stringify(_, null, 2))
 //   .then(console.log)
 
-// scrapeCourse(
-//   "https://edu.epfl.ch/coursebook/fr/distributed-algorithms-CS-451?cb_cycle=bama_cyclemaster&cb_section=in"
-// ).then(console.log);
+;(async () => {
+  let course = await scrapeCourse(
+    "https://edu.epfl.ch/studyplan/en/master/computer-science/coursebook/mobile-networks-COM-405"
+  )
+  console.log(course)
+})()
